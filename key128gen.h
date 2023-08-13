@@ -1,23 +1,14 @@
-#include <string>
+#include <cinttypes>
 
-class KEY128 {
-public:
-    union {
-        unsigned char c[16];
-        struct {
-            uint64_t u[2];
-        };
-    };
-    KEY128();
-    explicit KEY128(const std::string &hex);
-    explicit KEY128(const char* hex);
-    KEY128(KEY128 &value);
-    KEY128(uint64_t hi, uint64_t lo);
-    std::size_t operator()(const KEY128 &value) const;
-    bool operator==(const KEY128 &rhs) const;
-    bool operator<(const KEY128 &rhs) const;
-    bool operator>(const KEY128 &rhs) const;
-    bool operator!=(const KEY128 &rhs) const;
-};   // 16 bytes
+uint8_t* keyGen(
+    uint8_t* retVal,
+    uint32_t keyNumber,
+    uint8_t* key,
+    uint32_t devAddr
+);
 
-uint32_t calc();
+uint8_t* phrase2key(
+    uint8_t* retVal,
+    const char* phrase,
+    size_t size
+);

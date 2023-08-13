@@ -60,29 +60,3 @@ std::string hex2string(const std::string &hex)
 	std::stringstream ss(hex);
     return readHex(ss);
 }
-
-std::string KEY2string(
-	const KEY128 &value
-)
-{
-	return hexString(&value, sizeof(value));
-}
-
-void string2KEY(
-	KEY128 &retval,
-	const std::string &str
-)
-{
-	size_t len = str.size();
-	std::string v;
-	if (len > sizeof(KEY128))
-		v = hex2string(str);
-	else
-		v= str;
-	len = v.size();
-	if (len > sizeof(KEY128))
-		len = sizeof(KEY128);
-	memmove(&retval.c, v.c_str(), len);
-	if (len < sizeof(KEY128))
-		memset(&retval.c + len, 0, sizeof(KEY128) - len);
-}
