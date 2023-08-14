@@ -28,13 +28,11 @@ nobase_dist_include_HEADERS = \
 	third_party/argtable3/argtable3.h \
 	key128gen.h key-string.h err-list.h
 
-SRC_AES = third_party/system/crypto/aes.c third_party/system/crypto/cmac.c
-
 tlns_key_gen_SOURCES = \
 	$(SRC_AES) $(SRC_ARGTABLE) $(SRC_TLNS_KEY_GEN)
 tlns_key_gen_LDADD = $(commonlibs)
 tlns_key_gen_CPPFLAGS = -DTLNS_VERSION=$(VERSION)
-tlns_key_gen_LDFLAGS = -version-info $(VERSION_INFO)
+# tlns_key_gen_LDFLAGS = -version-info $(VERSION_INFO)
 
 #
 # Configs, readme, CMake etc.
