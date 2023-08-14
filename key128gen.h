@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <cinttypes>
 
 uint8_t* keyGen(
