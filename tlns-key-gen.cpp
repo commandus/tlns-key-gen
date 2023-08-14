@@ -91,15 +91,24 @@ int main(int argc, char **argv)
         exit(ERR_CODE_COMMAND_LINE);
     for (std::vector<std::string>::const_iterator it(config.magic.begin()); it != config.magic.end(); it++) {
         if (config.verbosity > 0)
-            std::cout << *it << "\n";
+            std::cout << "key: " << *it << "\n";
+        // generate "master key" by the passphrase
         uint8_t phraseKey[16];
         phrase2key(phraseKey, it->c_str(), it->size());
         for (std::vector<uint32_t>::const_iterator ita(config.address.begin()); ita != config.address.end(); ita++) {
-            std::cout << std::hex << *ita << ": ";
-            for (int i = 0; i < 4; i++) {
+            // generate EUI
+            uint8_t eui[8];
+            euiGen(eui, KEY_NUMBER_EUI, phraseKey, *ita);
+            if (config.verbosity > 0) 
+                std::cout << "| Addr  | EUI            | NWK                            | APP                            |" << "\n"
+                          << "+-------+----------------+--------------------------------+--------------------------------+\n";
+            std::cout << std::setw(8) << std::hex << *ita << " ";
+            std::cout << std::hex << std::setw(16) << hexString(eui, 8)  << " ";
+
+            for (int i = KEY_NUMBER_NWK; i <= KEY_NUMBER_APP; i++) {
                 uint8_t key[16];
                 keyGen(key, i, phraseKey, *ita);
-                std::cout << std::hex << hexString(key, 16)  << " ";
+                std::cout << std::hex << std::setw(32) << hexString(key, 16)  << " ";
             }
             std::cout << std::endl;
         }

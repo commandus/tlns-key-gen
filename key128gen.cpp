@@ -9,6 +9,18 @@
 // KSCH_SIZE = 240
 #define KSCH_SIZE	(N_MAX_ROUNDS + 1) * N_BLOCK
 
+void euiGen(
+    uint8_t *retVal,
+    uint32_t keyNumber,
+    uint8_t *key,
+    uint32_t devAddr
+)
+{
+    uint8_t k[16];
+    keyGen((uint8_t *) &k, keyNumber, key, devAddr);
+    memmove(retVal, &k, 8);
+}
+
 uint8_t* keyGen(
 	uint8_t *retVal,
 	uint32_t keyNumber,
