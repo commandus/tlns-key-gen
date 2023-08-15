@@ -17,15 +17,18 @@ set(SRC_ARGTABLE
 )
 
 set(SRC_TLNS_KEY_GEN
-	tlns-key-gen.cpp
-	key128gen.cpp
-	key-string.cpp
+	tlns-key-gen.cpp key128gen.cpp lorawan-types.cpp lorawan-conv.cpp lorawan-string.cpp
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+#	set (OS_SPECIFIC_LIBS wsock32 ws2_32 Userenv iphlpapi)
+	set (OS_SPECIFIC_LIBS ws2_32)
+endif()
 
 include_directories("third_party" ".")
 
 add_executable(tlns-key-gen ${SRC_TLNS_KEY_GEN} ${SRC_AES} ${SRC_ARGTABLE})
-# target_link_libraries(tlns-key-gen PRIVATE )
+target_link_libraries(tlns-key-gen PRIVATE ${OS_SPECIFIC_LIBS})
 # target_include_directories(tlns-key-gen PRIVATE )
 # target_compile_definitions(tlns-key-gen PRIVATE )
 

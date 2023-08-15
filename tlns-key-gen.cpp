@@ -15,15 +15,51 @@
 
 #include "argtable3/argtable3.h"
 #include "key128gen.h"
-#include "key-string.h"
 #include "err-list.h"
+#include "lorawan-types.h"
+#include "lorawan-string.h"
 
 const std::string programName = "tlns-key-gen";
+
+class AddressRange {
+public:
+    DEVADDR addr_start;
+    DEVADDR addr_finish;
+    AddressRange() {
+    }
+    AddressRange(const char *value) {
+        parse(value);
+    }
+
+    bool parse(
+        const char *value
+    )
+    {
+        std::string s(value);
+        auto p = s.find(':');
+        if (p == std::string::npos)
+            return false;
+        uint8_t t = (uint8_t) strtoul(s.substr(0, p - 1).c_str(), nullptr, 16);
+        auto p2 = s.find(':', p + 1);
+        if (p2 == std::string::npos)
+            return false;
+        uint32_t nid = strtoul(s.substr(p + 1, p2 - p - 1).c_str(), nullptr, 16);
+        auto p3 = s.find('-', p2 + 1);
+        if (p3 == std::string::npos)
+            return false;
+        uint32_t a = strtoul(s.substr(p2 + 1, p3 - p2 - 1).c_str(), nullptr, 16);
+        addr_start.set(t, nid, a);
+        uint32_t a2 = strtoul(s.substr(p3).c_str(), nullptr, 16);
+        addr_finish.set(t, nid, a2);
+        return true;
+    }
+};
 
 class TlnsKeyGenConfiguration {
 public:
     std::vector<std::string> magic;
     std::vector<uint32_t> address;
+    std::vector<AddressRange> address_range;
     int verbosity;			// verbosity level
 };
 
@@ -39,9 +75,8 @@ int parseCmd(
         char *argv[])
 {
     // magic string(key)
-    struct arg_str* a_magic = arg_strn("k", "key", "<magic-string>", 0, 100, "Magic passphrase. Default- random number");
-    struct arg_str* a_address = arg_strn(nullptr, nullptr, "<hex-number>", 1, 100, "address");
-
+    struct arg_str* a_magic = arg_strn("k", "key", "<passphrase>", 0, 100, "Passphrase (10-20 characters). Default- random number");
+    struct arg_str* a_address = arg_strn(nullptr, nullptr, "<addr> | <T:NwkId:addr-addr>", 1, 100, "address (up to 8 hexadecimal digits). Address range: T- type(0..7), NwkId- network id (0..N)");
     struct arg_lit *a_verbosity = arg_litn("v", "verbose", 0, 3, "Set verbosity level");
     struct arg_lit *a_help = arg_lit0("?", "help", "Show this help");
     struct arg_end *a_end = arg_end(20);
@@ -63,7 +98,11 @@ int parseCmd(
         config->magic.push_back(std::string(a_magic->sval[i]));
     }
     for (size_t i = 0; i < a_address->count; i++) {
-        config->address.push_back(strtoul(a_address->sval[i], nullptr, 16));
+        AddressRange ar;
+        if (ar.parse(a_address->sval[i]))
+            config->address_range.push_back(ar);
+        else
+            config->address.push_back(strtoul(a_address->sval[i], nullptr, 16));
     }
 
     // special case: '--help' takes precedence over error reporting
@@ -81,6 +120,31 @@ int parseCmd(
 
     arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
     return 0;
+}
+
+
+void printKeys(
+    std::ostream &strm,
+    uint8_t *phraseKey,
+    uint32_t addr,
+    int verbosity
+)
+{
+    // generate EUI
+    uint8_t eui[8];
+    euiGen(eui, KEY_NUMBER_EUI, phraseKey, addr);
+    if (verbosity > 0) 
+        strm << "| Addr  | EUI            | NWK                            | APP                            |\n"
+             << "+-------+----------------+--------------------------------+--------------------------------+\n";
+    strm << std::setw(8) << std::hex << addr << " ";
+    strm << std::hex << std::setw(16) << hexString(eui, 8)  << " ";
+
+    for (int i = KEY_NUMBER_NWK; i <= KEY_NUMBER_APP; i++) {
+        uint8_t key[16];
+        keyGen(key, i, phraseKey, addr);
+        strm << std::hex << std::setw(32) << hexString(key, 16)  << " ";
+    }
+    strm << std::endl;
 }
 
 int main(int argc, char **argv)
@@ -102,23 +166,13 @@ int main(int argc, char **argv)
             // generate "master key" by the passphrase
             phrase2key(phraseKey, it->c_str(), it->size());
         }
-
         for (std::vector<uint32_t>::const_iterator ita(config.address.begin()); ita != config.address.end(); ita++) {
-            // generate EUI
-            uint8_t eui[8];
-            euiGen(eui, KEY_NUMBER_EUI, phraseKey, *ita);
-            if (config.verbosity > 0) 
-                std::cout << "| Addr  | EUI            | NWK                            | APP                            |" << "\n"
-                          << "+-------+----------------+--------------------------------+--------------------------------+\n";
-            std::cout << std::setw(8) << std::hex << *ita << " ";
-            std::cout << std::hex << std::setw(16) << hexString(eui, 8)  << " ";
-
-            for (int i = KEY_NUMBER_NWK; i <= KEY_NUMBER_APP; i++) {
-                uint8_t key[16];
-                keyGen(key, i, phraseKey, *ita);
-                std::cout << std::hex << std::setw(32) << hexString(key, 16)  << " ";
+            printKeys(std::cout, phraseKey, *ita, config.verbosity);
+        }
+        for (std::vector<AddressRange>::const_iterator itr(config.address_range.begin()); itr != config.address_range.end(); itr++) {
+            for (DEVADDR itra(itr->addr_start); itra != itr->addr_finish; ++itra) {
+                printKeys(std::cout, phraseKey, itra.get(), config.verbosity);
             }
-            std::cout << std::endl;
         }
     }
     return 0;

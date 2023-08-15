@@ -21,12 +21,13 @@ bin_PROGRAMS = tlns-key-gen
 
 SRC_AES = third_party/system/crypto/aes.c third_party/system/crypto/cmac.c
 SRC_ARGTABLE = third_party/argtable3/argtable3.c
-SRC_TLNS_KEY_GEN = tlns-key-gen.cpp key128gen.cpp key-string.cpp
+SRC_TLNS_KEY_GEN = tlns-key-gen.cpp key128gen.cpp lorawan-types.cpp lorawan-conv.cpp lorawan-string.cpp
 
 nobase_dist_include_HEADERS = \
 	third_party/system/crypto/aes.h third_party/system/crypto/cmac.h \
 	third_party/argtable3/argtable3.h \
-	key128gen.h key-string.h err-list.h
+	key128gen.h err-list.h \
+	lorawan-types.h lorawan-const.h lorawan-string.h lorawan-error.h
 
 tlns_key_gen_SOURCES = \
 	$(SRC_AES) $(SRC_ARGTABLE) $(SRC_TLNS_KEY_GEN)
@@ -46,7 +47,6 @@ dist_config_DATA = \
 #
 # Tests
 #
-
 test_key_SOURCES = \
 	tests/test-key.cpp
 
