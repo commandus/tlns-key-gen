@@ -39,7 +39,7 @@ int parseCmd(
         char *argv[])
 {
     // magic string(key)
-    struct arg_str* a_magic = arg_strn("k", "key", "<magic-string>", 1, 100, "Magic");
+    struct arg_str* a_magic = arg_strn("k", "key", "<magic-string>", 0, 100, "Magic passphrase. Default- random number");
     struct arg_str* a_address = arg_strn(nullptr, nullptr, "<hex-number>", 1, 100, "address");
 
     struct arg_lit *a_verbosity = arg_litn("v", "verbose", 0, 3, "Set verbosity level");
@@ -89,12 +89,20 @@ int main(int argc, char **argv)
     int r = parseCmd(&config, argc, argv);
     if (r != 0)
         exit(ERR_CODE_COMMAND_LINE);
+    if (config.magic.empty())
+        config.magic.push_back("");
+
     for (std::vector<std::string>::const_iterator it(config.magic.begin()); it != config.magic.end(); it++) {
-        if (config.verbosity > 0)
-            std::cout << "key: " << *it << "\n";
-        // generate "master key" by the passphrase
         uint8_t phraseKey[16];
-        phrase2key(phraseKey, it->c_str(), it->size());
+        if (it->empty()) {
+            rnd2key(phraseKey);
+        } else {
+            if (config.verbosity > 0)
+                std::cout << "key: " << *it << "\n";
+            // generate "master key" by the passphrase
+            phrase2key(phraseKey, it->c_str(), it->size());
+        }
+
         for (std::vector<uint32_t>::const_iterator ita(config.address.begin()); ita != config.address.end(); ita++) {
             // generate EUI
             uint8_t eui[8];
