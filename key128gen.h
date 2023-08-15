@@ -45,6 +45,15 @@ uint8_t* keyGen(
 );
 
 /**
+ * Generate pseudo-random 128 bit long key
+ * @param retVal return 128 bits (16 bytes) "master key"
+ * @return 128 bit long key
+ */
+uint8_t* rnd2key(
+    uint8_t* retVal
+);
+
+/**
  * Generate "master key"
  * @param retVal return 128 bits (16 bytes) "master key"
  * @param phrase passphrase

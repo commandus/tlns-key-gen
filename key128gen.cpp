@@ -1,6 +1,8 @@
 #include "key128gen.h"
 
 #include <cstring>
+#include <cstdlib>
+#include <ctime>
 
 #include "system/crypto/aes.h"
 #include "system/crypto/cmac.h"
@@ -62,6 +64,18 @@ uint8_t* keyGen(
 	AES_CMAC_Update(&aesCmacCtx, blockB, sizeof(blockB));
 	AES_CMAC_Final(retVal, &aesCmacCtx);
 	return retVal;
+}
+
+uint8_t* rnd2key(
+    uint8_t* retVal
+) {
+    srand(time(nullptr));
+    int *p = (int *) retVal;
+    for (int i = 0; i < 16 / sizeof(int); i++) {
+        int rnd = rand();
+        memmove(p, &rnd, sizeof(int));
+    }
+    return retVal;
 }
 
 uint8_t* phrase2key(
