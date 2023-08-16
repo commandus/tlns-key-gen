@@ -22,16 +22,8 @@
 const std::string programName = "tlns-key-gen";
 
 class AddressRange {
-public:
-    DEVADDR addr_start;
-    DEVADDR addr_finish;
-    AddressRange() {
-    }
-    AddressRange(const char *value) {
-        parse(value);
-    }
-
-    bool parse(
+private:
+    bool parseTypeNwkAddr(
         const char *value
     )
     {
@@ -39,7 +31,7 @@ public:
         auto p = s.find(':');
         if (p == std::string::npos)
             return false;
-        uint8_t t = (uint8_t) strtoul(s.substr(0, p - 1).c_str(), nullptr, 16);
+        uint8_t t = (uint8_t) strtoul(s.substr(0, p).c_str(), nullptr, 16);
         auto p2 = s.find(':', p + 1);
         if (p2 == std::string::npos)
             return false;
@@ -52,6 +44,41 @@ public:
         uint32_t a2 = strtoul(s.substr(p3 + 1).c_str(), nullptr, 16);
         addr_finish.set(t, nid, a2);
         return true;
+    }
+
+    bool parseAddrAddr(
+        const char *value
+    )
+    {
+        std::string s(value);
+        auto p = s.find('-');
+        if (p == std::string::npos)
+            return false;
+        uint32_t a1 = (uint32_t) strtoul(s.substr(0, p).c_str(), nullptr, 16);
+        uint32_t a2 = (uint32_t) strtoul(s.substr(p + 1).c_str(), nullptr, 16);
+        addr_start.set(a1);
+        addr_finish.set(a2);
+        return true;
+    }
+
+public:
+    DEVADDR addr_start;
+    DEVADDR addr_finish;
+    AddressRange()
+    {
+    }
+    AddressRange(const char *value) {
+        parse(value);
+    }
+
+    bool parse(
+        const char *value
+    )
+    {
+        if (!parseTypeNwkAddr(value))
+            return parseAddrAddr(value);
+        else
+            return true;        
     }
 };
 
@@ -76,7 +103,7 @@ int parseCmd(
 {
     // magic string(key)
     struct arg_str* a_magic = arg_strn("k", "key", "<passphrase>", 0, 100, "Passphrase (10-20 characters). Default- random number");
-    struct arg_str* a_address = arg_strn(nullptr, nullptr, "<addr> | <T:NwkId:addr-addr>", 1, 100, "address (up to 8 hexadecimal digits). Address range: T- type(0..7), NwkId- network id (0..N)");
+    struct arg_str* a_address = arg_strn(nullptr, nullptr, "<addr> | <addr-addr>| <T:NwkId:addr-addr>", 1, 100, "address up to 8 hex digits). Address range: T- type(0..7), NwkId- network id (0..N)");
     struct arg_lit *a_verbosity = arg_litn("v", "verbose", 0, 3, "Set verbosity level");
     struct arg_lit *a_help = arg_lit0("?", "help", "Show this help");
     struct arg_end *a_end = arg_end(20);
