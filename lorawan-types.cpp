@@ -1048,13 +1048,13 @@ bool DEVADDR::operator>(
 }
 
 bool DEVADDR::operator<=(
-        const DEVADDR &rhs
+    const DEVADDR &rhs
 ) const {
     return u <= rhs.u;
 }
 
 bool DEVADDR::operator>=(
-        const DEVADDR &rhs
+    const DEVADDR &rhs
 ) const {
     return u >= rhs.u;
 }
