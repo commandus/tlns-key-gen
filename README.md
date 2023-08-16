@@ -129,3 +129,16 @@ key: yellow
 
 ### Address range agruments
 
+Pass address range 1234e to 1234f:
+```
+ ./tlns-key-gen 1234e-1234f
+   1234e 729e4d952ceb1fe7 06ef364b2962f64697c0946ca94ba651 68e17271298513297398152848493c3b
+   1234f e90ad6a778e35c2d fb71ae3324b5d13f3f342053e126aaac 05f738404925a543913fcaf83c1273a9
+```
+
+Pass type 1, network id 2f and address range 234e-234f:
+```
+./tlns-key-gen 1:2f:234e-234f
+af00234e 3ffdc4fcb1c13da1 4da15e88684f9313449050c621ddf674 9a235338a77cfec4ab8c28a458c2de13
+af00234f dfa3e9028b437aa0 6cd4bb10c567ea43c44737ff59831e44 bfd70d76fe9c8c7363f757444c237a01
+```
