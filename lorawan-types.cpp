@@ -1038,13 +1038,25 @@ bool DEVADDR::operator==(
 bool DEVADDR::operator<(
 	const DEVADDR &rhs
 ) const {
-	return rhs.u < u;
+	return u < rhs.u;
 }
 
 bool DEVADDR::operator>(
 	const DEVADDR &rhs
 ) const {
-	return rhs.u > u;
+	return u > rhs.u;
+}
+
+bool DEVADDR::operator<=(
+        const DEVADDR &rhs
+) const {
+    return u <= rhs.u;
+}
+
+bool DEVADDR::operator>=(
+        const DEVADDR &rhs
+) const {
+    return u >= rhs.u;
 }
 
 bool DEVADDR::operator!=(
@@ -1238,10 +1250,10 @@ bool KEY128::operator==(const KEY128 &rhs) const {
     return memcmp(&c, &rhs.c, 16) == 0;
 }
 bool KEY128::operator<(const KEY128 &rhs) const {
-    return memcmp(&rhs.c, &c, 16) < 0;
+    return memcmp(&c, &rhs.c, 16) < 0;
 }
 bool KEY128::operator>(const KEY128 &rhs) const {
-    return memcmp(&rhs.c, &c, 16) > 0;
+    return memcmp(&c, &rhs.c, 16) > 0;
 }
 bool KEY128::operator!=(const KEY128 &rhs) const {
     return memcmp(&rhs.c, &c, 16) != 0;
@@ -1269,10 +1281,10 @@ bool DEVEUI::operator==(const DEVEUI &rhs) const {
     return rhs.u == u;
 }
 bool DEVEUI::operator<(const DEVEUI &rhs) const {
-    return rhs.u < u;
+    return u < rhs.u;
 }
 bool DEVEUI::operator>(const DEVEUI &rhs) const {
-    return rhs.u > u;
+    return u > rhs.u;
 }
 bool DEVEUI::operator!=(const DEVEUI &rhs) const {
     return rhs.u != u;

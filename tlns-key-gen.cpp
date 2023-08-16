@@ -49,7 +49,7 @@ public:
             return false;
         uint32_t a = strtoul(s.substr(p2 + 1, p3 - p2 - 1).c_str(), nullptr, 16);
         addr_start.set(t, nid, a);
-        uint32_t a2 = strtoul(s.substr(p3).c_str(), nullptr, 16);
+        uint32_t a2 = strtoul(s.substr(p3 + 1).c_str(), nullptr, 16);
         addr_finish.set(t, nid, a2);
         return true;
     }
@@ -122,7 +122,6 @@ int parseCmd(
     return 0;
 }
 
-
 void printKeys(
     std::ostream &strm,
     uint8_t *phraseKey,
@@ -170,7 +169,7 @@ int main(int argc, char **argv)
             printKeys(std::cout, phraseKey, *ita, config.verbosity);
         }
         for (std::vector<AddressRange>::const_iterator itr(config.address_range.begin()); itr != config.address_range.end(); itr++) {
-            for (DEVADDR itra(itr->addr_start); itra != itr->addr_finish; ++itra) {
+            for (DEVADDR itra(itr->addr_start); itra <= itr->addr_finish; ++itra) {
                 printKeys(std::cout, phraseKey, itra.get(), config.verbosity);
             }
         }

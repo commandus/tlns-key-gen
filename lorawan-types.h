@@ -103,6 +103,8 @@ public:
 	bool operator==(const DEVADDR &rhs) const;
 	bool operator<(const DEVADDR &rhs) const;
 	bool operator>(const DEVADDR &rhs) const;
+    bool operator<=(const DEVADDR &rhs) const;
+    bool operator>=(const DEVADDR &rhs) const;
 	bool operator!=(const DEVADDR &rhs) const;
 
 	DEVADDR(const DEVADDR &value);
