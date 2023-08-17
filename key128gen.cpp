@@ -1,15 +1,19 @@
 #include "key128gen.h"
 
 #include <cstring>
+#if __cplusplus < 199711L
 #include <cstdlib>
 #include <ctime>
+#else
+#include <random>
+#endif
 
 #include "system/crypto/aes.h"
 #include "system/crypto/cmac.h"
 
 // N_MAX_ROUNDS = 14  N_BLOCK = 4 * 4 = 15
 // KSCH_SIZE = 240
-#define KSCH_SIZE	(N_MAX_ROUNDS + 1) * N_BLOCK
+#define KSCH_SIZE	((N_MAX_ROUNDS + 1) * N_BLOCK)
 
 void euiGen(
     uint8_t *retVal,
@@ -37,13 +41,13 @@ uint8_t* keyGen(
 	blockB[2] = 68;
 	blockB[3] = 89;
 
-	uint8_t* kA = (uint8_t*) &keyNumber;
+	auto* kA = (uint8_t*) &keyNumber;
 	blockB[4] = kA[0];
 	blockB[5] = kA[1];
 	blockB[6] = kA[2];
 	blockB[7] = kA[3];
 
-	uint8_t* dA = (uint8_t*) &devAddr;
+	auto* dA = (uint8_t*) &devAddr;
 	blockB[8] = dA[0];
 	blockB[9] = dA[1];
 	blockB[10] = dA[2];
@@ -66,6 +70,7 @@ uint8_t* keyGen(
 	return retVal;
 }
 
+#if __cplusplus < 199711L
 uint8_t* rnd2key(
     uint8_t* retVal
 ) {
@@ -77,6 +82,22 @@ uint8_t* rnd2key(
     }
     return retVal;
 }
+#else
+uint8_t* rnd2key(
+    uint8_t* retVal
+) {
+    std::mt19937 g;
+    uint32_t seedValue = 0;
+    g.seed(seedValue);
+    std::uniform_int_distribution<uint32_t> distribution;
+    int *p = (int *) retVal;
+    for (int i = 0; i < 16 / sizeof(uint32_t); i++) {
+        uint32_t rnd = distribution(g);
+        memmove(p, &rnd, sizeof(uint32_t));
+    }
+    return retVal;
+}
+#endif
 
 uint8_t* phrase2key(
 	uint8_t* retVal,

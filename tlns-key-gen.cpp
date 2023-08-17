@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <sstream>
 #include <iomanip>
 #include <algorithm>
 
@@ -64,10 +63,8 @@ private:
 public:
     DEVADDR addr_start;
     DEVADDR addr_finish;
-    AddressRange()
-    {
-    }
-    AddressRange(const char *value) {
+    AddressRange() = default;
+    explicit AddressRange(const char *value) {
         parse(value);
     }
 
@@ -87,7 +84,7 @@ public:
     std::vector<std::string> magic;
     std::vector<uint32_t> address;
     std::vector<AddressRange> address_range;
-    int verbosity;			// verbosity level
+    int verbosity{};			// verbosity level
 };
 
 /**
@@ -122,7 +119,7 @@ int parseCmd(
 
     config->verbosity = a_verbosity->count;
     for (size_t i = 0; i < a_magic->count; i++) {
-        config->magic.push_back(std::string(a_magic->sval[i]));
+        config->magic.emplace_back(a_magic->sval[i]);
     }
     for (size_t i = 0; i < a_address->count; i++) {
         AddressRange ar;
@@ -151,17 +148,14 @@ int parseCmd(
 
 void printKeys(
     std::ostream &strm,
+    const std::string &masterkey,
     uint8_t *phraseKey,
-    uint32_t addr,
-    int verbosity
+    uint32_t addr
 )
 {
     // generate EUI
     uint8_t eui[8];
     euiGen(eui, KEY_NUMBER_EUI, phraseKey, addr);
-    if (verbosity > 0) 
-        strm << "| Addr  | EUI            | NWK                            | APP                            |\n"
-             << "+-------+----------------+--------------------------------+--------------------------------+\n";
     strm << std::setw(8) << std::hex << addr << " ";
     strm << std::hex << std::setw(16) << hexString(eui, 8)  << " ";
 
@@ -170,7 +164,7 @@ void printKeys(
         keyGen(key, i, phraseKey, addr);
         strm << std::hex << std::setw(32) << hexString(key, 16)  << " ";
     }
-    strm << std::endl;
+    strm << " " << masterkey << std::endl;
 }
 
 int main(int argc, char **argv)
@@ -180,24 +174,26 @@ int main(int argc, char **argv)
     if (r != 0)
         exit(ERR_CODE_COMMAND_LINE);
     if (config.magic.empty())
-        config.magic.push_back("");
+        config.magic.emplace_back("");
+
+    if (config.verbosity > 0)
+        std::cout << "| Addr  | EUI            | NWK                            | APP                            | master Key\n"
+                  << "+-------+----------------+--------------------------------+--------------------------------+------------\n";
 
     for (std::vector<std::string>::const_iterator it(config.magic.begin()); it != config.magic.end(); it++) {
         uint8_t phraseKey[16];
         if (it->empty()) {
             rnd2key(phraseKey);
         } else {
-            if (config.verbosity > 0)
-                std::cout << "key: " << *it << "\n";
             // generate "master key" by the passphrase
             phrase2key(phraseKey, it->c_str(), it->size());
         }
         for (std::vector<uint32_t>::const_iterator ita(config.address.begin()); ita != config.address.end(); ita++) {
-            printKeys(std::cout, phraseKey, *ita, config.verbosity);
+            printKeys(std::cout, *it, phraseKey, *ita);
         }
         for (std::vector<AddressRange>::const_iterator itr(config.address_range.begin()); itr != config.address_range.end(); itr++) {
             for (DEVADDR itra(itr->addr_start); itra <= itr->addr_finish; ++itra) {
-                printKeys(std::cout, phraseKey, itra.get(), config.verbosity);
+                printKeys(std::cout, *it, phraseKey, itra.get());
             }
         }
     }
