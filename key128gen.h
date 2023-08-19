@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <cinttypes>
+#include "lorawan-types.h"
 
 /*
  * Step 1. Get passphrase (about 10-20 bytes long)
@@ -64,4 +65,26 @@ uint8_t* phrase2key(
     uint8_t* retVal,
     const char* phrase,
     size_t size
+);
+
+/*
+ * Generates session keys 1)- network session key, 2)- application session key
+ * @see LoRaWAN Specification v1.0 6.2.5 Join-accept message
+ * @see LoRaMacJoinComputeSKeys() https://os.mbed.com/teams/Semtech/code/LoRaWAN-lib//file/2426a05fe29e/LoRaMacCrypto.cpp/
+ *
+ * NwkSKey = aes128_encrypt(AppKey, 0x01 | AppNonce | NetID | DevNonce | pad16)
+ * AppSKey = aes128_encrypt(AppKey, 0x02 | AppNonce | NetID | DevNonce | pad16)
+ * 0x01 | 0x02  1 bytes
+ * AppNonce     3 bytes
+ * NetID        3 bytes
+ * DevNonce     2 bytes
+ * 0            7 zeroes
+ */
+uint8_t* sessionKeyGen(
+    uint8_t* retVal,
+    KEY128& key,
+    uint8_t keyType,	// 1 byte network: 1, application: 2
+    APPNONCE appNonce,	// 3 bytes
+    NETID netId,		// 3 bytes
+    DEVNONCE& devNonce	// 2 bytes
 );

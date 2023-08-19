@@ -61,3 +61,4 @@ void string2JOINNONCE(JOINNONCE &retval, const std::string &value);
 void string2NETID(NETID &retVal, const char *str);
 void string2FREQUENCY(FREQUENCY &retVal, const char *value);
 void string2JOINNONCE(JOINNONCE &retval, const char *value);
+void string2APPNONCE(APPNONCE& retval, const std::string& value);

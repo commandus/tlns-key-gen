@@ -201,7 +201,28 @@ public:
     explicit JOINNONCE(uint32_t value);
 };
 
-typedef uint16_t DEVNONCE;
+// typedef uint16_t DEVNONCE;
+class DEVNONCE {
+public:
+    union {
+        unsigned char c[2];
+        uint16_t u;
+    };
+    DEVNONCE();
+    explicit DEVNONCE(const std::string& hex);
+    explicit DEVNONCE(uint16_t value);
+};
+
+// typedef unsigned char APPNONCE[3];
+class APPNONCE {
+public:
+    union {
+        unsigned char c[3];
+    };
+    APPNONCE();
+    explicit APPNONCE(const std::string& hex);
+    explicit APPNONCE(uint32_t value);
+};
 
 typedef uint8_t FREQUENCY[3];
 

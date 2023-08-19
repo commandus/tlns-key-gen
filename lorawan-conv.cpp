@@ -66,3 +66,14 @@ void int2JOINNONCE(
     retVal.c[1] = (r >> 8) & 0xff;
     retVal.c[2] = (r >> 16) & 0xff;
 }
+
+void int2APPNONCE(
+    APPNONCE& retVal,
+    int value
+)
+{
+    uint32_t r = NTOH4(value);
+    retVal.c[0] = r & 0xff;
+    retVal.c[1] = (r >> 8) & 0xff;
+    retVal.c[2] = (r >> 16) & 0xff;
+}

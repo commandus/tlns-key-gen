@@ -523,6 +523,17 @@ void string2JOINNONCE(
     retval.c[2] = (r >> 16) & 0xff;
 }
 
+void string2APPNONCE(
+	APPNONCE& retval,
+	const std::string& value
+)
+{
+	uint32_t r = NTOH4(strtol(value.c_str(), nullptr, 16));
+	retval.c[0] = r & 0xff;
+	retval.c[1] = (r >> 8) & 0xff;
+	retval.c[2] = (r >> 16) & 0xff;
+}
+
 void string2NETID(
 	NETID &retVal,
 	const char *value

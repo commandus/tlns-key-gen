@@ -61,7 +61,6 @@ uint32_t JOINNONCE2int(const JOINNONCE &value);
 
 int FREQUENCY2int(const FREQUENCY &frequency);
 
-void int2JOINNONCE(
-    JOINNONCE &retVal,
-    int value
-);
+void int2JOINNONCE(JOINNONCE &retVal, int value);
+
+void int2APPNONCE(APPNONCE& retVal, int value);

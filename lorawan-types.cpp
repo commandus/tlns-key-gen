@@ -1311,6 +1311,46 @@ JOINNONCE::JOINNONCE(
     int2JOINNONCE(*this, value);
 }
 
+APPNONCE::APPNONCE()
+{
+    c[0] = 0;
+    c[1] = 0;
+    c[2] = 0;
+}
+
+APPNONCE::APPNONCE(
+    const std::string& hex
+)
+{
+    string2APPNONCE(*this, hex);
+}
+
+APPNONCE::APPNONCE(
+    uint32_t value
+)
+{
+    int2APPNONCE(*this, value);
+}
+
+DEVNONCE::DEVNONCE()
+    : u(0)
+{
+}
+
+DEVNONCE::DEVNONCE(
+    const std::string& hex
+)
+{
+    *this = string2DEVNONCE(hex);
+}
+
+DEVNONCE::DEVNONCE(
+    uint16_t value
+)
+{
+    u = value;
+}
+
 DEVICENAME::DEVICENAME()
 {
     memset(&c, 0, 8);
@@ -1405,7 +1445,7 @@ DEVICEID::DEVICEID(
     memset(&this->appEUI.c, 0, sizeof(DEVEUI));
     memset(&this->nwkKey.c, 0, sizeof(KEY128));
     memset(&this->appKey.c, 0, sizeof(KEY128));
-    this->devNonce = 0;
+    this->devNonce.u = 0;
     memset(&this->joinNonce.c, 0, sizeof(JOINNONCE));
 }
 
