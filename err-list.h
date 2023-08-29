@@ -1,1 +1,2 @@
+#define CODE_OK   0
 #define ERR_CODE_COMMAND_LINE   -5001

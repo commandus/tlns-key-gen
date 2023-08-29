@@ -176,11 +176,11 @@ int NETID::getTypeMask() const
     switch (((NETID_TYPE*) this)->networkType) {
         case 0:
         case 1:
-            return (1 << 6) - 1;    // 15 unused bits, 3 bits type, 6 bits- identifier
+            return (1 << 6) - 1;    // 15 unused bits, 3 bits type, 6 bits long identifier
         case 2:
-            return (1 << 9) - 1;    // 12 unused bits, 3 bits type, 9 bits- identifier
+            return (1 << 9) - 1;    // 12 unused bits, 3 bits type, 9 bits long identifier
         default:    // 3..7
-            return (1 << 21) - 1;   // 0 unused bits, 3 bits type, 21 bits- identifier
+            return (1 << 21) - 1;   // 0 unused bits, 3 bits type, 21 bits long identifier
     }
 }
 
@@ -347,6 +347,8 @@ int DEVADDR::setMinAddress(
 size_t DEVADDR::size()
 {
     uint8_t typ = getNetIdType();
+    if (typ >= 8)
+        return 0;
 #if DEFAULT_LORAWAN_BACKEND_VERSION_MINOR == 1
     return (1 << DEVADDR_TYPE_SIZES_1_1[typ].devDddrBits) - 1;
 #else
@@ -1243,7 +1245,7 @@ KEY128::KEY128(
 }
 
 std::size_t KEY128::operator()(const KEY128 &value) const {
-    return std::hash<std::size_t>{}(u[0] ^  u[1]);
+    return std::hash<std::size_t>{}(u[0] ^ u[1]);
 }
 
 bool KEY128::operator==(const KEY128 &rhs) const {
@@ -1392,7 +1394,7 @@ DEVICEID::DEVICEID() {
     memset(&this->appEUI.c, 0, sizeof(DEVEUI));
     memset(&this->nwkKey.c, 0, sizeof(KEY128));
     memset(&this->appKey.c, 0, sizeof(KEY128));
-    this->devNonce = devNonce;
+    this->devNonce.u = 0;
     memset(&this->joinNonce.c, 0, sizeof(JOINNONCE));
     memset(&this->name.c, 0, sizeof(DEVICENAME));
 	version.major = 1;
